@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUUMO 不動産会社リストアップ</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <span class="icon">🏢</span>
+                SUUMO 不動産会社リストアップ
+            </h1>
+            <p class="subtitle">物件検索結果から取扱会社を抽出</p>
+        </header>
+
+        <main class="main-content">
+            <div class="input-section">
+                <form id="scrapeForm">
+                    <div class="form-group">
+                        <label for="urlInput" class="form-label">
+                            URL を入力してください（1行に1つ、SUUMO・HOME'S対応）
+                        </label>
+                        <textarea id="urlInput" class="url-input" placeholder="https://suumo.jp/jj/chintai/ichiran/...
+https://www.homes.co.jp/chintai/room/...
+https://www.homes.co.jp/chintai/.../realtors/" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">検索</span>
+                        <span class="btn-icon">🔍</span>
+                    </button>
+                </form>
+            </div>
+
+            <div id="loadingIndicator" class="loading-indicator hidden">
+                <div class="spinner"></div>
+                <p>データを取得中...</p>
+            </div>
+
+            <div id="errorMessage" class="error-message hidden"></div>
+
+            <div id="resultsSection" class="results-section hidden">
+                <div class="results-header">
+                    <h2 class="results-title">抽出結果</h2>
+                    <div class="results-count">
+                        <span id="companyCount">0</span>社
+                    </div>
+                </div>
+                <ul id="companiesList" class="companies-list"></ul>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>※ このツールは個人利用を目的としています。適切な範囲でご利用ください。</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
