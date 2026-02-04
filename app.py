@@ -20,6 +20,7 @@ def detect_site(url):
 def scrape_suumo_page(url):
     """
     SUUMOの検索結果ページから不動産会社名を抽出
+    jnc（物件詳細）ページにも対応
     """
     try:
         # リクエストヘッダーを設定（ブラウザのように見せる）
@@ -35,7 +36,16 @@ def scrape_suumo_page(url):
         soup = BeautifulSoup(response.content, 'lxml')
         
         # CSSセレクタで会社名を抽出
+        # パターン1: 検索結果ページ（bc_*）
         company_elements = soup.select('.detailnote-box-item > div:first-of-type')
+        
+        # パターン2: 物件詳細ページ（jnc_*）- 複数店舗対応
+        if not company_elements:
+            company_elements = soup.select('.itemcassette-header-ttl')
+        
+        # パターン3: 物件詳細ページ（jnc_*）- メイン店舗のみ（フォールバック）
+        if not company_elements:
+            company_elements = soup.select('.advance_actioncard_reserve-sales-title')
         
         companies = set()
         for element in company_elements:
@@ -57,6 +67,7 @@ def scrape_homes_page(url):
     """
     HOME'Sページから不動産会社名を抽出
     単一会社パターンと複数会社パターンの両方に対応
+    人間確認（CAPTCHA）ページの検出にも対応
     """
     try:
         headers = {
@@ -67,6 +78,33 @@ def scrape_homes_page(url):
         response.raise_for_status()
         
         soup = BeautifulSoup(response.content, 'lxml')
+        
+        # 人間確認（CAPTCHA）ページの検出
+        page_text = soup.get_text().lower()
+        title = soup.title.string.lower() if soup.title and soup.title.string else ''
+        
+        # reCAPTCHA や人間確認ページの典型的なパターンを検出
+        captcha_indicators = [
+            'recaptcha',
+            'captcha',
+            'robot',
+            'ロボット',
+            '人間確認',
+            'セキュリティチェック',
+            'security check',
+            'are you human',
+            'verify you are human',
+            'not a robot'
+        ]
+        
+        for indicator in captcha_indicators:
+            if indicator in page_text or indicator in title:
+                raise Exception('HOME\'Sで人間確認（CAPTCHA）が表示されました。ブラウザで直接アクセスして確認してください。')
+        
+        # reCAPTCHA要素の直接検出
+        recaptcha_elements = soup.select('.g-recaptcha, [class*="recaptcha"], iframe[src*="recaptcha"]')
+        if recaptcha_elements:
+            raise Exception('HOME\'Sで人間確認（CAPTCHA）が表示されました。ブラウザで直接アクセスして確認してください。')
         
         companies = set()
         
